@@ -1,0 +1,44 @@
+{
+  "name": "agile_metric_service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@gitbeaker/node": "^35.8.1",
+    "@types/axios": "^0.9.36",
+    "@types/express": "^4.17.23",
+    "compromise": "^13.11.3",
+    "csv-parse": "^5.6.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.0.1",
+    "ejs": "^3.1.9",
+    "express": "^4.21.2",
+    "http-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^7.0.6",
+    "json2csv": "^6.0.0-alpha.2",
+    "node-fetch": "^2.7.0",
+    "pac-resolver": "^7.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "undici": "^7.11.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}

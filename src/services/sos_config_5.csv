@@ -1,0 +1,12 @@
+Project|ConfluencePageName|ConfluencePageID|PortfolioJIRAProjectID|PIStartDate|PIEndDate|IncludedSprintName|ExcludedSprintName|CodePageUrl|DodPageUrl|CodePageTitle|DodPageTitle|JiraBoardId|GitlabDashboardUrl|JiraTeamName|SprintFilter
+Risk and Finance Data Transformation|PI2.2025 EFRA UI SOS Update|2158198057|None|2025-04-02|2025-06-25|None|None|None|https://natwest.atlassian.net/jira/dashboards/79997|EFRA Code Page|PI2.2025 DOD/DOR Dashboard - EFRA UI|56125|natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/ExternalFinancialReportingAutomation|EFRA|None
+FRANK - Risk Apps Migration on AWS|FE PI2.2025 SOS Page|2175633364|None|2025-04-02|2025-06-25|None|ENGG-EXP|None|https://natwest.atlassian.net/jira/dashboards/80108|None|Explorers Current Sprint Development Progress|56516|natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/riskfocusextracts|Explorers|Explorer
+FRANK - Risk Apps Migration on AWS|PI2.2025 FE ENGG SOS Update|2175633392|None|2025-04-02|2025-06-25|None|None|None|None|None|None|57952|natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/riskfocusextracts|None|None
+FRANK - Risk Apps Migration on AWS|PI2.2025 SNC SOS Update|2165802360|None|2025-04-02|2025-06-25|None|None|None|https://natwest.atlassian.net/jira/dashboards/80047|None|Codevengers Current Sprint Development Progress|56514|natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/SingleNameConcentration|SNC|None
+Common Adjustment Framework Tool|PI2.2025 CAF SOS Page|2178442827|None|2025-04-02|2025-06-25|None|None|None|https://natwest.atlassian.net/jira/dashboards/80247|None|Techvengers Current Sprint Development Progress|54778|natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/commonadjustmentframework|CAF|None
+Risk and Finance Data Transformation|PI2.2025 Disclosure SOS Page|2183382864|None|2025-04-02|2025-06-25|None|None|None|None|None|None|58447|natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/commonadjustmentframework|CAF Disclosure|None
+FRANK - Risk Apps Migration on AWS|PI2.2025 Forbearance Reporting SOS|2181857969|None|2025-04-02|2025-06-25|None|None|None|None|None|None|56558|None|None|None
+Risk and Finance Data Transformation|PI2.2025 Core Data Spine - Cradle SOS|2181824639|None|2025-04-01|2025-06-25|None|None|None|None|None|None|54885|None|None|None
+
+
+
