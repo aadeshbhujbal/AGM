@@ -1,0 +1,67 @@
+include:
+  - project: natwestgroup/DigitalX/Technology/RiskFinanceLegalAndAuditSolutions/FinanceAndRiskDataPlatform/e-2-e-gitlab-cicd-templates
+    ref: e-2-e-gitlab-cicd-templates.3.0.0
+    file: cicd_pipeline_template.gitlab-ci.yml
+
+variables:
+  RUN_UNIT_TESTS: "false"
+  TRUNK_STRATEGY: "true"  
+  PROJECT_TYPE: "nodejs"
+  PROJECT_SUBTYPE: "typescript"
+  NODE_VERSION: "18"
+  NPM_REGISTRY: "https://registry.npmjs.org/"
+
+# Build stage variables
+build:
+  variables:
+    BUILD_COMMAND: "npm run build"
+    INSTALL_COMMAND: "npm ci"
+
+# Code quality thresholds - adjusted for Node.js/TypeScript projects
+code-quality-threshold-count:
+  variables:
+    BLOCKER_SCAN_COUNT_THRESHOLD: 0
+    CRITICAL_SCAN_COUNT_THRESHOLD: 0
+    MAJOR_SCAN_COUNT_THRESHOLD: 0
+    MINOR_SCAN_COUNT_THRESHOLD: 0
+    INFO_SCAN_COUNT_THRESHOLD: 0
+
+# Dependency scanning thresholds
+gemnasium-threshold-count:
+  variables:
+    CRITICAL_SCAN_COUNT_THRESHOLD: 0
+    HIGH_SCAN_COUNT_THRESHOLD: 3
+    MEDIUM_SCAN_COUNT_THRESHOLD: 5
+    LOW_SCAN_COUNT_THRESHOLD: 10
+    INFO_SCAN_COUNT_THRESHOLD: 0
+    UNKNOWN_SCAN_COUNT_THRESHOLD: 2
+
+# SAST (Static Application Security Testing) thresholds
+sast-threshold-count:
+  variables:
+    CRITICAL_SCAN_COUNT_THRESHOLD: 0
+    HIGH_SCAN_COUNT_THRESHOLD: 0
+    MEDIUM_SCAN_COUNT_THRESHOLD: 0
+    LOW_SCAN_COUNT_THRESHOLD: 0
+    INFO_SCAN_COUNT_THRESHOLD: 0
+    UNKNOWN_SCAN_COUNT_THRESHOLD: 0
+
+# Secret detection thresholds
+secret-detection-threshold-count:
+  variables:
+    CRITICAL_SCAN_COUNT_THRESHOLD: 0
+    HIGH_SCAN_COUNT_THRESHOLD: 0
+    MEDIUM_SCAN_COUNT_THRESHOLD: 0
+    LOW_SCAN_COUNT_THRESHOLD: 0
+    INFO_SCAN_COUNT_THRESHOLD: 0
+    UNKNOWN_SCAN_COUNT_THRESHOLD: 0
+
+# Container scanning (if you plan to containerize)
+container-scanning-threshold-count:
+  variables:
+    CRITICAL_SCAN_COUNT_THRESHOLD: 0
+    HIGH_SCAN_COUNT_THRESHOLD: 0
+    MEDIUM_SCAN_COUNT_THRESHOLD: 0
+    LOW_SCAN_COUNT_THRESHOLD: 0
+    INFO_SCAN_COUNT_THRESHOLD: 0
+    UNKNOWN_SCAN_COUNT_THRESHOLD: 0
