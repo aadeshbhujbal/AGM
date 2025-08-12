@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { piPlanningSummaryService } from '../../services/piPlanningService';
+import logger from '../../utils/logger';
 
 const router = Router();
 
@@ -142,6 +143,7 @@ router.get('/summary', async (req, res) => {
     });
     res.json(result);
   } catch (err) {
+    logger.error(`Error in PI planning summary endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -186,6 +188,7 @@ const getSummaryField = (field: string) => async (req: any, res: any) => {
     // Use type assertion to handle dynamic field access
     res.json({ [field]: (result as Record<string, any>)[actualField] });
   } catch (err) {
+    logger.error(`Error in PI planning ${field} endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 };

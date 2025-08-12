@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getVelocitySummary, getSprintTeamMembers, getSprintTeamMembersDetails, getAddedStoryPoints, getVelocityChartData } from '../../services/velocityService';
 import { getBoardIdFromProjectKey } from '../../services/jiraService';
 import { createServiceError, ServiceError } from '../../types/errors';
+import logger from '../../utils/logger';
 
 const router = Router();
 
@@ -391,7 +392,7 @@ router.get('/analytics', async (req, res) => {
     if (projectKey) {
       try {
         actualBoardId = await getBoardIdFromProjectKey(projectKey as string);
-        console.log(`[DEBUG] Converted project key ${projectKey} to board ID: ${actualBoardId}`);
+        logger.debug(`[DEBUG] Converted project key ${projectKey} to board ID: ${actualBoardId}`);
       } catch (error) {
         return res.status(404).json({ 
           error: `No board found for project key: ${projectKey}`,
@@ -410,7 +411,7 @@ router.get('/analytics', async (req, res) => {
       sprintPrefix: sprintPrefix as string | undefined,
     });
 
-    console.log(`[DEBUG] Velocity summary result: ${summaryResult.sprints.length} sprints found`);
+    logger.debug(`[DEBUG] Velocity summary result: ${summaryResult.sprints.length} sprints found`);
 
     // Calculate additional metrics for each sprint
     const enhancedSprints = summaryResult.sprints.map(sprint => {
@@ -536,7 +537,7 @@ router.get('/analytics', async (req, res) => {
           velocity
         };
       } catch (chartError) {
-        console.error('Error getting chart data:', chartError);
+        logger.error('Error getting chart data:', chartError);
         result.chartData = null;
       }
     }
@@ -556,7 +557,7 @@ router.get('/analytics', async (req, res) => {
               members: teamMembersDetails.members
             };
           } catch (error) {
-            console.error(`Error getting team members for sprint ${sprint.sprintId}:`, error);
+            logger.error(`Error getting team members for sprint ${sprint.sprintId}:`, error);
             teamMembersData[sprint.sprintId.toString()] = {
               count: 0,
               members: []
@@ -570,7 +571,7 @@ router.get('/analytics', async (req, res) => {
               issues: [] // Could be enhanced to include actual issue details
             };
           } catch (error) {
-            console.error(`Error getting added story points for sprint ${sprint.sprintId}:`, error);
+            logger.error(`Error getting added story points for sprint ${sprint.sprintId}:`, error);
             addedStoryPointsData[sprint.sprintId.toString()] = {
               total: 0,
               issues: []
@@ -583,7 +584,7 @@ router.get('/analytics', async (req, res) => {
           addedStoryPoints: addedStoryPointsData
         };
       } catch (granularError) {
-        console.error('Error getting granular metrics:', granularError);
+        logger.error('Error getting granular metrics:', granularError);
         result.granularMetrics = null;
       }
     }
@@ -628,7 +629,7 @@ router.get('/analytics', async (req, res) => {
           }
         };
       } catch (trendsError) {
-        console.error('Error calculating trends:', trendsError);
+        logger.error('Error calculating trends:', trendsError);
         result.trends = null;
       }
     }
@@ -668,7 +669,7 @@ router.get('/analytics', async (req, res) => {
           recommendations
         };
       } catch (insightsError) {
-        console.error('Error generating insights:', insightsError);
+        logger.error('Error generating insights:', insightsError);
         result.insights = null;
       }
     }
@@ -709,7 +710,7 @@ router.get('/analytics', async (req, res) => {
           }
         };
       } catch (predictionsError) {
-        console.error('Error generating predictions:', predictionsError);
+        logger.error('Error generating predictions:', predictionsError);
         result.predictions = null;
       }
     }
@@ -960,7 +961,7 @@ router.get('/sprint/:sprintId', async (req, res) => {
           }
         };
       } catch (error) {
-        console.error(`Error getting team members for sprint ${sprintId}:`, error);
+        logger.error(`Error getting team members for sprint ${sprintId}:`, error);
         result.teamMembers = null;
       }
     }
@@ -975,7 +976,7 @@ router.get('/sprint/:sprintId', async (req, res) => {
           issues: [] // Could be enhanced to include actual issue details
         };
       } catch (error) {
-        console.error(`Error getting added story points for sprint ${sprintId}:`, error);
+        logger.error(`Error getting added story points for sprint ${sprintId}:`, error);
         result.addedStoryPoints = null;
       }
     }
@@ -1003,7 +1004,7 @@ router.get('/sprint/:sprintId', async (req, res) => {
           }
         };
       } catch (error) {
-        console.error(`Error getting performance analysis for sprint ${sprintId}:`, error);
+        logger.error(`Error getting performance analysis for sprint ${sprintId}:`, error);
         result.performanceAnalysis = null;
       }
     }
@@ -1042,14 +1043,14 @@ router.get('/sprint/:sprintId', async (req, res) => {
           ]
         };
       } catch (error) {
-        console.error(`Error generating recommendations for sprint ${sprintId}:`, error);
+        logger.error(`Error generating recommendations for sprint ${sprintId}:`, error);
         result.recommendations = null;
       }
     }
 
     res.json(result);
   } catch (err) {
-    console.error('Error in sprint velocity endpoint:', err);
+    logger.error('Error in sprint velocity endpoint:', err);
     res.status(500).json({ error: (err as Error).message });
   }
 });

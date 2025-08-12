@@ -12,21 +12,7 @@ import {
   getBoardRapidViews,
   getBoardStatistics
 } from '../../services/jiraService';
-import { fetchWithProxy } from '../../utils/fetchWithProxy';
-import config from '../../config';
 import logger from '../../utils/logger';
-
-// Import validateJiraCredentials from jiraService
-function validateJiraCredentials() {
-  if (!config.jiraUrl || !config.jiraUser || !config.jiraToken) {
-    throw new Error('Jira credentials are not set in environment variables');
-  }
-  return { 
-    url: config.jiraUrl, 
-    user: config.jiraUser, 
-    token: config.jiraToken 
-  };
-}
 
 const router = Router();
 

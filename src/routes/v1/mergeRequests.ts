@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getMergeRequestsHeatmap, getMergeRequestsAnalytics } from '../../services/mergeRequestsService';
 import { exportMergeRequestsCsv } from '../../controllers/v1/mergeRequestsExportController';
+import logger from '../../utils/logger';
 
 const router = Router();
 
@@ -85,6 +86,7 @@ router.get('/heatmap', async (req, res) => {
     });
     res.json(result);
   } catch (err) {
+    logger.error(`Error in merge requests heatmap endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -164,6 +166,7 @@ router.get('/analytics', async (req, res) => {
     });
     res.json(result);
   } catch (err) {
+    logger.error(`Error in merge requests analytics endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });

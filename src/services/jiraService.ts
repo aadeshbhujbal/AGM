@@ -731,7 +731,7 @@ export async function getProjectKeyByExactName(
       return { key: caseInsensitiveMatch.key, name: caseInsensitiveMatch.name };
     }
 
-    logger.log(`No exact match found for project name: '${projectName}'`);
+    logger.info(`No exact match found for project name: '${projectName}'`);
     return { key: null, name: null };
   } catch (error) {
     logger.error(`Error finding project: ${error}`);
@@ -793,7 +793,7 @@ export async function getJiraStatusCategories(projectKey: string): Promise<{
     }
   } catch (error) {
     logger.error(`Error getting project statuses: ${error}`);
-    logger.log("Falling back to getting all statuses (not project-specific)");
+    logger.info("Falling back to getting all statuses (not project-specific)");
   }
 
   return statusCategories;
@@ -1085,7 +1085,7 @@ export async function getAllBoards(options?: {
 
     let filteredBoards = boardsData.values;
 
-    logger.log(`[DEBUG] Total boards found: ${boardsData.values.length}`);
+    logger.debug(`[DEBUG] Total boards found: ${boardsData.values.length}`);
     logger.log(
       `[DEBUG] Available boards:`,
       boardsData.values.map((b) => ({
@@ -1103,7 +1103,7 @@ export async function getAllBoards(options?: {
         (board) =>
           board.location && board.location.projectKey === options.projectKey
       );
-      logger.log(
+      logger.debug(
         `[DEBUG] Filtered by projectKey '${options.projectKey}': ${beforeFilter} -> ${filteredBoards.length} boards`
       );
     }
@@ -1114,14 +1114,14 @@ export async function getAllBoards(options?: {
       filteredBoards = filteredBoards.filter(
         (board) => board.type === options.boardType
       );
-      logger.log(
+      logger.debug(
         `[DEBUG] Filtered by boardType '${options.boardType}': ${beforeFilter} -> ${filteredBoards.length} boards`
       );
     }
 
     // Include detailed information if requested
     if (options?.includeDetails) {
-      logger.log(
+      logger.debug(
         `[DEBUG] Fetching detailed information for ${filteredBoards.length} boards`
       );
       const detailedBoards = await Promise.all(

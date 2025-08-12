@@ -38,7 +38,7 @@ export const fetchWithProxy = async (url: string, options: FetchOptions = {}): P
   }
 
   // Configure proxy agents
-  let agent: HttpsProxyAgent | HttpProxyAgent | undefined;
+  let agent: HttpsProxyAgent<string> | HttpProxyAgent<string> | undefined;
   
   if (url.startsWith('https://') && config.httpsProxy) {
     agent = new HttpsProxyAgent(config.httpsProxy);

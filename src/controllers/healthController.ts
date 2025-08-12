@@ -4,7 +4,7 @@ import config from "../config";
 import logger from "../utils/logger";
 
 export const healthCheck = async (
-  req: Request,
+  _req: Request,
   res: Response
 ): Promise<void> => {
   res.json({
@@ -16,7 +16,7 @@ export const healthCheck = async (
 };
 
 export const statusCheck = async (
-  req: Request,
+  _req: Request,
   res: Response
 ): Promise<void> => {
   // Check Jira

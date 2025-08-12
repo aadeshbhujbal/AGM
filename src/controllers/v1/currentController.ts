@@ -4,6 +4,7 @@ import { piPlanningSummaryService } from '../../services/piPlanningService';
 import { getVelocitySummary } from '../../services/velocityService';
 import { JiraSprint } from '../../types/jira';
 import logger from '../../utils/logger';
+import config from '../../config';
 
 export async function getCurrentSummary(req: Request, res: Response) {
   try {
@@ -115,7 +116,7 @@ export async function getCurrentSummary(req: Request, res: Response) {
 
           objectives.push({
             issueKey: issue.key,
-            issueUrl: `${process.env.JIRA_URL}/browse/${issue.key}`,
+            issueUrl: `${config.jiraUrl}/browse/${issue.key}`,
             description: issue.fields.summary || '',
             storyPoints,
             status: issue.fields.status?.name || '',

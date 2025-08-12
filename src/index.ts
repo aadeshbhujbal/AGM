@@ -3,11 +3,6 @@ dotenv.config();
 
 import express, { Request, Response, NextFunction } from 'express';
 import healthRoutes from './routes/health';
-import jiraRoutes from './routes/v1/jira';
-import piPlanningRoutes from './routes/v1/piPlanning';
-import mergeRequestsRoutes from './routes/v1/mergeRequests';
-import velocityRoutes from './routes/v1/velocity';
-import orchestrationRoutes from './routes/v1/orchestration';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import apiRoutes from './routes/index';
@@ -40,7 +35,7 @@ const app = express();
 app.use(express.json());
 
 // Request logger middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, _res: Response, next: NextFunction) => {
   logger.http(`${req.method} ${req.originalUrl}`);
   next();
 });
@@ -65,7 +60,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/health', healthRoutes);
 
 // Debug endpoint for environment variables
-app.get('/debug/env', (req: Request, res: Response) => {
+app.get('/debug/env', (_req: Request, res: Response) => {
   res.json({
     JIRA_URL: config.jiraUrl ? 'SET' : 'NOT SET',
     JIRA_USER: config.jiraUser ? 'SET' : 'NOT SET',
@@ -88,7 +83,7 @@ app.use('/api/v1', (req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   logger.error(`Global error handler: ${err.message}`);
   res.status(500).json({ error: 'Internal Server Error' });
 });

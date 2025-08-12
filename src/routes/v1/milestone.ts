@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getMilestones, getPIProgression } from '../../services/milestoneService';
 import { MilestoneStatus, TrackStatus } from '../../types/milestone';
 import { createServiceError, ServiceError } from '../../types/errors';
+import logger from '../../utils/logger';
 
 const router = Router();
 
@@ -99,7 +100,7 @@ router.get('/list', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    console.error('Error in milestone list endpoint:', err);
+    logger.error('Error in milestone list endpoint:', err);
     if (err instanceof Error) {
       const serviceError = createServiceError(err.message, 'Milestone Service', 'getMilestones');
       res.status(500).json({ error: serviceError.message, code: serviceError.code });
@@ -199,7 +200,7 @@ router.get('/pi-progression', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    console.error('Error in PI progression endpoint:', err);
+    logger.error('Error in PI progression endpoint:', err);
     if (err instanceof Error) {
       const serviceError = createServiceError(err.message, 'Milestone Service', 'getPIProgression');
       res.status(500).json({ error: serviceError.message, code: serviceError.code });

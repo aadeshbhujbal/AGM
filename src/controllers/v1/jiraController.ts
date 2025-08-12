@@ -60,7 +60,7 @@ export const getEpics = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const testJiraConnection = async (req: Request, res: Response): Promise<void> => {
+export const testJiraConnection = async (_req: Request, res: Response): Promise<void> => {
   if (!config.jiraUrl || !config.jiraUser || !config.jiraToken) {
     logger.error('Missing Jira environment variables');
     res.status(500).json({ status: 'error', message: 'Missing Jira environment variables' });

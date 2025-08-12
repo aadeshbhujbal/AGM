@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { fetchWithProxy } from '../../utils/fetchWithProxy';
 import config from '../../config';
 import logger from '../../utils/logger';
+import { getConfluenceHeaders } from '../../utils/headers';
 
 export const updateConfluencePage = async (req: Request, res: Response): Promise<void> => {
   const { pageId, title, body, auth } = req.body;
@@ -17,8 +18,8 @@ export const updateConfluencePage = async (req: Request, res: Response): Promise
       {
         method: 'PUT',
         headers: {
+          ...getConfluenceHeaders(),
           'Authorization': `Basic ${Buffer.from(`${auth.username}:${auth.token}`).toString('base64')}`,
-          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           id: pageId,
@@ -38,7 +39,7 @@ export const updateConfluencePage = async (req: Request, res: Response): Promise
   }
 };
 
-export const testConfluenceConnection = async (req: Request, res: Response): Promise<void> => {
+export const testConfluenceConnection = async (_req: Request, res: Response): Promise<void> => {
   if (!config.confluenceUrl || !config.confluenceUser || !config.confluenceToken) {
     logger.error('Missing Confluence environment variables');
     res.status(500).json({ status: 'error', message: 'Missing Confluence environment variables' });
@@ -48,10 +49,7 @@ export const testConfluenceConnection = async (req: Request, res: Response): Pro
   try {
     await fetchWithProxy(`${config.confluenceUrl}/wiki/rest/api/user/current`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Basic ${Buffer.from(`${config.confluenceUser}:${config.confluenceToken}`).toString('base64')}`,
-        'Content-Type': 'application/json',
-      },
+      headers: getConfluenceHeaders(),
     });
     logger.info('Confluence connection test successful');
     res.json({ status: 'success', message: 'Connected to Confluence successfully' });
