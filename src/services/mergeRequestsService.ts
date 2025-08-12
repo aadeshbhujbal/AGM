@@ -15,6 +15,8 @@ import {
   MergeRequestAnalytics,
   GitLabConnectionTestResult,
 } from "../types/mergeRequests";
+import config from "../config";
+import logger from "../utils/logger";
 
 // Define your own project interface:
 interface GitLabProject {
@@ -412,7 +414,7 @@ async function fetchProjectContributionData(
         deletions: commitDiffStatistics?.deletions,
       });
     } catch (commitDetailsFetchError) {
-      console.error(
+      logger.error(
         `Error fetching detailed commit information for ${currentCommit.id}:`,
         commitDetailsFetchError
       );
@@ -443,12 +445,12 @@ export async function getMergeRequestsHeatmap(
   options: MergeRequestsHeatmapOptions
 ): Promise<MergeRequestsHeatmapResult> {
   const { groupId, startDate, endDate } = options;
-  const token = process.env.GITLAB_TOKEN;
+  const token = config.gitlabToken;
   if (!token) throw new Error("GITLAB_TOKEN not set in environment");
 
   const gitlabApi = new Gitlab({
     token,
-    host: process.env.GITLAB_HOST || "https://gitlab.com",
+    host: config.gitlabUrl,
   });
 
   // Get user mapping first
@@ -664,7 +666,7 @@ export async function getMergeRequestsHeatmap(
               : undefined,
         });
       } catch (mergeRequestDetailsError) {
-        console.error(
+        logger.error(
           `Error fetching MR details for ${currentMergeRequest.iid}:`,
           mergeRequestDetailsError
         );
@@ -722,7 +724,7 @@ export async function getMergeRequestsHeatmap(
         }
       } catch (approvalFetchError) {
         // Silently handle approval fetch errors
-        console.error(
+        logger.error(
           `Error fetching approval information for MR ${currentMergeRequest.iid}:`,
           approvalFetchError
         );
@@ -790,7 +792,7 @@ export async function getMergeRequestsHeatmap(
           }
         }
       } catch (notesFetchError) {
-        console.error(
+        logger.error(
           `Error fetching notes for MR ${currentMergeRequest.iid}:`,
           notesFetchError
         );
@@ -830,12 +832,12 @@ export async function getMergeRequestsAnalytics(
   options: MergeRequestsHeatmapOptions
 ): Promise<MergeRequestAnalytics[]> {
   const { groupId, startDate, endDate } = options;
-  const token = process.env.GITLAB_TOKEN;
+  const token = config.gitlabToken;
   if (!token) throw new Error("GITLAB_TOKEN not set in environment");
 
   const gitlabApi = new Gitlab({
     token,
-    host: process.env.GITLAB_HOST || "https://gitlab.com",
+    host: config.gitlabUrl,
   });
 
   // Get all projects in the group
@@ -897,7 +899,7 @@ export async function getMergeRequestsAnalytics(
           }
         }
       } catch (commitFetchError) {
-        console.error(
+        logger.error(
           `Error fetching commits for MR ${currentMergeRequest.iid}:`,
           commitFetchError
         );
@@ -921,8 +923,8 @@ export async function getMergeRequestsAnalytics(
 }
 
 export async function testGitlabConnection(): Promise<GitLabConnectionTestResult> {
-  const token = process.env.GITLAB_TOKEN;
-  const host = process.env.GITLAB_HOST || "https://gitlab.com";
+  const token = config.gitlabToken;
+  const host = config.gitlabUrl;
 
   if (!token) {
     return { status: "error", message: "Missing GitLab token" };
@@ -931,6 +933,7 @@ export async function testGitlabConnection(): Promise<GitLabConnectionTestResult
   try {
     const gitlabApi = new Gitlab({ token, host });
     const currentUser = await gitlabApi.Users.current();
+    logger.info("GitLab connection test successful");
     return {
       status: "success",
       message: "Connected to GitLab successfully",
@@ -941,6 +944,7 @@ export async function testGitlabConnection(): Promise<GitLabConnectionTestResult
       },
     };
   } catch (connectionError: any) {
+    logger.error("GitLab connection test failed:", connectionError.message);
     return { status: "error", message: connectionError.message };
   }
 }

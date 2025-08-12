@@ -3,6 +3,7 @@ import { getSprintsFromJira, getReleasesFromJira, getIssuesFromJira } from '../.
 import { piPlanningSummaryService } from '../../services/piPlanningService';
 import { getVelocitySummary } from '../../services/velocityService';
 import { JiraSprint } from '../../types/jira';
+import logger from '../../utils/logger';
 
 export async function getCurrentSummary(req: Request, res: Response) {
   try {
@@ -16,16 +17,16 @@ export async function getCurrentSummary(req: Request, res: Response) {
     const currentJiraSprint = jiraSprints.length > 0 ? jiraSprints[0] : null;
 
     // 2. Current Jira Release (latest unreleased, or most recent released)
-    console.log(`[DEBUG] Fetching releases for project: ${project}`);
+    logger.debug(`Fetching releases for project: ${project}`);
     const jiraReleases = await getReleasesFromJira(project as string);
-    console.log(`[DEBUG] Found ${jiraReleases.length} releases for project ${project}`);
+    logger.debug(`Found ${jiraReleases.length} releases for project ${project}`);
     
     let currentJiraRelease = null;
     if (jiraReleases && jiraReleases.length > 0) {
       currentJiraRelease = jiraReleases.find(release => !release.released) || jiraReleases[jiraReleases.length - 1];
-      console.log(`[DEBUG] Selected release: ${currentJiraRelease?.name} (released: ${currentJiraRelease?.released})`);
+      logger.debug(`Selected release: ${currentJiraRelease?.name} (released: ${currentJiraRelease?.released})`);
     } else {
-      console.log(`[DEBUG] No releases found for project ${project}`);
+      logger.debug(`No releases found for project ${project}`);
     }
 
     // 3. PI Planning current sprints - use current sprint dates if no PI dates provided
@@ -42,7 +43,7 @@ export async function getCurrentSummary(req: Request, res: Response) {
       if (currentJiraSprint && currentJiraSprint.startDate && currentJiraSprint.endDate) {
         piStartDateToUse = currentJiraSprint.startDate.split('T')[0]; // Extract date part only
         piEndDateToUse = currentJiraSprint.endDate.split('T')[0]; // Extract date part only
-        console.log(`[DEBUG] Using current sprint dates for PI Planning: ${piStartDateToUse} to ${piEndDateToUse}`);
+        logger.debug(`Using current sprint dates for PI Planning: ${piStartDateToUse} to ${piEndDateToUse}`);
       } else {
         // Fallback to current quarter if no current sprint
         const now = new Date();
@@ -56,7 +57,7 @@ export async function getCurrentSummary(req: Request, res: Response) {
         piStartDateToUse = `${currentYear}-${String(quarterStartMonth + 1).padStart(2, '0')}-01`;
         piEndDateToUse = `${currentYear}-${String(quarterStartMonth + 3).padStart(2, '0')}-${new Date(currentYear, quarterStartMonth + 3, 0).getDate()}`;
         
-        console.log(`[DEBUG] Using default quarter dates for PI Planning: ${piStartDateToUse} to ${piEndDateToUse}`);
+        logger.debug(`Using default quarter dates for PI Planning: ${piStartDateToUse} to ${piEndDateToUse}`);
       }
     }
     
@@ -69,9 +70,9 @@ export async function getCurrentSummary(req: Request, res: Response) {
       });
       currentPiSprints = piSummary?.currentSprints || [];
       currentPI = piSummary || null;
-      console.log(`[DEBUG] PI Planning summary generated with ${currentPiSprints.length} current sprints`);
+      logger.debug(`PI Planning summary generated with ${currentPiSprints.length} current sprints`);
     } catch (piError) {
-      console.error('Error fetching PI Planning data:', piError);
+      logger.error('Error fetching PI Planning data:', piError);
       // Continue with empty PI data
     }
 
@@ -130,7 +131,7 @@ export async function getCurrentSummary(req: Request, res: Response) {
         };
       }
     } catch (objectivesError) {
-      console.error('Error fetching sprint objectives:', objectivesError);
+      logger.error('Error fetching sprint objectives:', objectivesError);
       // Continue with empty objectives data
     }
 
@@ -150,7 +151,7 @@ export async function getCurrentSummary(req: Request, res: Response) {
       sprintObjectives: currentSprintObjectives,
     });
   } catch (error) {
-    console.error('Error in getCurrentSummary:', error);
+    logger.error('Error in getCurrentSummary:', error);
     res.status(500).json({ error: (error as Error).message });
   }
 }

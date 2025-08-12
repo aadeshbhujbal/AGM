@@ -13,20 +13,18 @@ import {
   getBoardStatistics
 } from '../../services/jiraService';
 import { fetchWithProxy } from '../../utils/fetchWithProxy';
+import config from '../../config';
+import logger from '../../utils/logger';
 
 // Import validateJiraCredentials from jiraService
 function validateJiraCredentials() {
-  const JIRA_URL = process.env.JIRA_URL;
-  const JIRA_USER = process.env.JIRA_USER;
-  const JIRA_TOKEN = process.env.JIRA_TOKEN;
-  
-  if (!JIRA_URL || !JIRA_USER || !JIRA_TOKEN) {
+  if (!config.jiraUrl || !config.jiraUser || !config.jiraToken) {
     throw new Error('Jira credentials are not set in environment variables');
   }
   return { 
-    url: JIRA_URL, 
-    user: JIRA_USER, 
-    token: JIRA_TOKEN 
+    url: config.jiraUrl, 
+    user: config.jiraUser, 
+    token: config.jiraToken 
   };
 }
 
@@ -70,7 +68,7 @@ router.get('/releases', async (req, res) => {
     const releases = await getReleasesFromJira(project as string);
     res.json(releases);
   } catch (err) {
-    console.error('Error in releases endpoint:', err);
+    logger.error(`Error in releases endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -113,7 +111,7 @@ router.get('/sprints', async (req, res) => {
     const sprints = await getSprintsFromJira(boardId as string);
     res.json(sprints);
   } catch (err) {
-    console.error('Error in sprints endpoint:', err);
+    logger.error(`Error in sprints endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -156,7 +154,7 @@ router.get('/issues', async (req, res) => {
     const issues = await getIssuesFromJira(jql as string);
     res.json(issues);
   } catch (err) {
-    console.error('Error in issues endpoint:', err);
+    logger.error(`Error in issues endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -199,7 +197,7 @@ router.get('/epics', async (req, res) => {
     const epics = await getEpicsFromJira(boardId as string);
     res.json(epics);
   } catch (err) {
-    console.error('Error in epics endpoint:', err);
+    logger.error(`Error in epics endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -251,21 +249,21 @@ router.get('/boards', async (req, res) => {
     if (boardType) options.boardType = boardType as string;
     if (includeDetails) options.includeDetails = includeDetails === 'true';
     
-    console.log(`[DEBUG] Fetching boards with options:`, options);
+    logger.debug(`Fetching boards with options:`, options);
     
     const boards = await getAllBoards(options);
     
-    console.log(`[DEBUG] Found ${boards.length} boards`);
+    logger.debug(`Found ${boards.length} boards`);
     if (boards.length === 0 && projectKey) {
-      console.log(`[DEBUG] No boards found for project: ${projectKey}. This might indicate:`);
-      console.log(`[DEBUG] 1. Project key is incorrect`);
-      console.log(`[DEBUG] 2. Project has no boards configured`);
-      console.log(`[DEBUG] 3. User doesn't have access to project boards`);
+      logger.debug(`No boards found for project: ${projectKey}. This might indicate:`);
+      logger.debug(`1. Project key is incorrect`);
+      logger.debug(`2. Project has no boards configured`);
+      logger.debug(`3. User doesn't have access to project boards`);
     }
     
     res.json(boards);
   } catch (err) {
-    console.error('Error in boards endpoint:', err);
+    logger.error(`Error in boards endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -306,7 +304,7 @@ router.get('/boards/:boardId', async (req, res) => {
     const boardDetails = await getBoardDetails(boardId);
     res.json(boardDetails);
   } catch (err) {
-    console.error('Error in board details endpoint:', err);
+    logger.error(`Error in board details endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -347,7 +345,7 @@ router.get('/boards/:boardId/configuration', async (req, res) => {
     const boardConfig = await getBoardConfiguration(boardId);
     res.json(boardConfig);
   } catch (err) {
-    console.error('Error in board configuration endpoint:', err);
+    logger.error(`Error in board configuration endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -418,7 +416,7 @@ router.get('/boards/:boardId/issues', async (req, res) => {
     const boardIssues = await getBoardIssues(boardId, options);
     res.json(boardIssues);
   } catch (err) {
-    console.error('Error in board issues endpoint:', err);
+    logger.error(`Error in board issues endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -459,7 +457,7 @@ router.get('/boards/:boardId/backlog', async (req, res) => {
     const boardBacklog = await getBoardBacklog(boardId);
     res.json(boardBacklog);
   } catch (err) {
-    console.error('Error in board backlog endpoint:', err);
+    logger.error(`Error in board backlog endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -502,7 +500,7 @@ router.get('/boards/:boardId/rapid-views', async (req, res) => {
     const rapidViews = await getBoardRapidViews(boardId);
     res.json(rapidViews);
   } catch (err) {
-    console.error('Error in board rapid views endpoint:', err);
+    logger.error(`Error in board rapid views endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -543,7 +541,7 @@ router.get('/boards/:boardId/statistics', async (req, res) => {
     const boardStats = await getBoardStatistics(boardId);
     res.json(boardStats);
   } catch (err) {
-    console.error('Error in board statistics endpoint:', err);
+    logger.error(`Error in board statistics endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });

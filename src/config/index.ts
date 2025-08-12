@@ -10,14 +10,28 @@ dotenv.config({ path: envPath });
 
 interface AppConfig {
   port: number;
+  env: string;
+  
+  // Jira Configuration
   jiraUrl: string;
   jiraUser: string;
   jiraToken: string;
-  gitlabToken: string;
+  
+  // GitLab Configuration
+  gitlabUrl: string;
   gitlabHost: string;
+  gitlabToken: string;
+  
+  // Confluence Configuration
   confluenceUrl: string;
-  confluenceToken: string; 
-  env: string;
+  confluenceUser: string;
+  confluenceToken: string;
+  
+  // Proxy Configuration
+  httpProxy?: string;
+  httpsProxy?: string;
+  noProxy?: string;
+  nodeTlsRejectUnauthorized: boolean;
 }
 
 function requireEnv(name: string): string {
@@ -28,16 +42,34 @@ function requireEnv(name: string): string {
   return value;
 }
 
+function optionalEnv(name: string, defaultValue?: string): string | undefined {
+  return process.env[name] || defaultValue;
+}
+
 const config: AppConfig = {
   port: parseInt(process.env.PORT || '3000', 10),
+  env: process.env.NODE_ENV || 'development',
+  
+  // Jira Configuration
   jiraUrl: requireEnv('JIRA_URL'),
   jiraUser: requireEnv('JIRA_USER'),
   jiraToken: requireEnv('JIRA_TOKEN'),
+  
+  // GitLab Configuration
+  gitlabUrl: optionalEnv('GITLAB_URL', 'https://natwest.gitlab-dedicated.com') || '',
+  gitlabHost: optionalEnv('GITLAB_HOST', 'https://natwest.gitlab-dedicated.com') || '',
   gitlabToken: requireEnv('GITLAB_TOKEN'),
-  gitlabHost: process.env.GITLAB_HOST || 'https://natwest.gitlab-dedicated.com/',
+  
+  // Confluence Configuration
   confluenceUrl: requireEnv('CONFLUENCE_URL'),
-  confluenceToken: requireEnv('CONFLUENCE_TOKEN'), // Add this
-  env: process.env.NODE_ENV || 'development',
+  confluenceUser: optionalEnv('CONFLUENCE_USER', process.env.JIRA_USER) || '',
+  confluenceToken: requireEnv('CONFLUENCE_TOKEN'),
+  
+  // Proxy Configuration
+  httpProxy: optionalEnv('HTTP_PROXY'),
+  httpsProxy: optionalEnv('HTTPS_PROXY'),
+  noProxy: optionalEnv('NO_PROXY'),
+  nodeTlsRejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED === '1',
 };
 
 export default config;

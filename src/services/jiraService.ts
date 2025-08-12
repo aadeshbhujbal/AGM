@@ -9,10 +9,8 @@ import {
   JiraSprintState,
   JiraVelocityStats,
 } from "../types/jira";
-
-const JIRA_URL = process.env.JIRA_URL;
-const JIRA_USER = process.env.JIRA_USER;
-const JIRA_TOKEN = process.env.JIRA_TOKEN;
+import config from "../config";
+import logger from "../utils/logger";
 
 interface JiraCredentials {
   url: string;
@@ -21,13 +19,13 @@ interface JiraCredentials {
 }
 
 function validateJiraCredentials(): JiraCredentials {
-  if (!JIRA_URL || !JIRA_USER || !JIRA_TOKEN) {
+  if (!config.jiraUrl || !config.jiraUser || !config.jiraToken) {
     throw new Error("Jira credentials are not set in environment variables");
   }
   return {
-    url: JIRA_URL,
-    user: JIRA_USER,
-    token: JIRA_TOKEN,
+    url: config.jiraUrl,
+    user: config.jiraUser,
+    token: config.jiraToken,
   };
 }
 
@@ -56,7 +54,7 @@ export async function getReleasesFromJira(
         : true
     );
     if (!targetProject) {
-      console.warn(
+      logger.warn(
         `Project not found: ${projectName}. Available projects: ${allProjects
           .map((p) => p.key)
           .join(", ")}`
@@ -85,9 +83,8 @@ export async function getReleasesFromJira(
           );
           return (await versionResponse.json()) as JiraVersion;
         } catch (error) {
-          console.error(
-            `Error fetching version details for ${version.id}:`,
-            error
+          logger.error(
+            `Error fetching version details for ${version.id}: ${error}`
           );
           return version;
         }
@@ -104,7 +101,7 @@ export async function getReleasesFromJira(
       overdue: version.overdue,
     }));
   } catch (error) {
-    console.error(`Error fetching releases for project ${projectName}:`, error);
+    logger.error(`Error fetching releases for project ${projectName}: ${error}`);
     return []; // Return empty array instead of throwing error
   }
 }
@@ -281,7 +278,7 @@ export async function getSprintsFromJira(
             });
           }
         } catch (error) {
-          console.error(`Error parsing dates for sprint ${sprint.id}:`, error);
+          logger.error(`Error parsing dates for sprint ${sprint.id}: ${error}`);
           continue;
         }
       }
@@ -337,13 +334,13 @@ export async function getSprintsFromJira(
 
     return sprints;
   } catch (error) {
-    console.error(`Error in getSprintsFromJira for board ${boardId}:`, error);
+    logger.error(`Error in getSprintsFromJira for board ${boardId}: ${error}`);
     throw error;
   }
 }
 
 export async function getIssuesFromJira(jql: string): Promise<JiraIssue[]> {
-  if (!JIRA_URL || !JIRA_USER || !JIRA_TOKEN) {
+  if (!config.jiraUrl || !config.jiraUser || !config.jiraToken) {
     throw new Error("Jira credentials are not set in environment variables");
   }
 
@@ -403,13 +400,13 @@ export async function getIssuesFromJira(jql: string): Promise<JiraIssue[]> {
 
     return issues;
   } catch (error) {
-    console.error(`Error fetching issues with JQL: ${jql}`, error);
+    logger.error(`Error fetching issues with JQL: ${jql} ${error}`);
     throw error;
   }
 }
 
 export async function getEpicsFromJira(boardId: string): Promise<JiraEpic[]> {
-  if (!JIRA_URL || !JIRA_USER || !JIRA_TOKEN) {
+  if (!config.jiraUrl || !config.jiraUser || !config.jiraToken) {
     throw new Error("Jira credentials are not set in environment variables");
   }
 
@@ -476,7 +473,7 @@ export async function getEpicsFromJira(boardId: string): Promise<JiraEpic[]> {
       })
     );
   } catch (error) {
-    console.error(`Error fetching epics for board ${boardId}:`, error);
+    logger.error(`Error fetching epics for board ${boardId}: ${error}`);
     throw error;
   }
 }
@@ -514,7 +511,7 @@ export async function getBoardIdFromProjectKey(
     );
 
     if (!board) {
-      console.error(
+      logger.error(
         `No board found for project key: ${projectKey}. Available boards:`,
         boardsData.values.map((b) => ({ id: b.id, location: b.location }))
       );
@@ -525,7 +522,7 @@ export async function getBoardIdFromProjectKey(
 
     return board.id.toString();
   } catch (error) {
-    console.error(`Error getting board ID for project ${projectKey}:`, error);
+    logger.error(`Error getting board ID for project ${projectKey}: ${error}`);
     throw error;
   }
 }
@@ -570,9 +567,8 @@ export async function getSprintIssuesWithAssignee(
       []
     );
   } catch (error) {
-    console.error(
-      `Error fetching sprint issues for sprint ${sprintId}:`,
-      error
+    logger.error(
+      `Error fetching sprint issues for sprint ${sprintId}: ${error}`
     );
     throw error;
   }
@@ -611,9 +607,8 @@ export async function getVelocityStatsFromJira(
 
     return (await velocityResponse.json()) as JiraVelocityStats;
   } catch (error) {
-    console.error(
-      `Error fetching velocity stats for board/project ${boardIdOrProjectKey}:`,
-      error
+    logger.error(
+      `Error fetching velocity stats for board/project ${boardIdOrProjectKey}: ${error}`
     );
     throw error;
   }
@@ -688,9 +683,8 @@ export async function getJiraReleaseStatus(versionId: string): Promise<string> {
 
     return onTrack ? "On Track Threshold" : "On Track";
   } catch (error) {
-    console.error(
-      `Error getting release status for version ${versionId}:`,
-      error
+    logger.error(
+      `Error getting release status for version ${versionId}: ${error}`
     );
     return "On Track";
   }
@@ -737,10 +731,10 @@ export async function getProjectKeyByExactName(
       return { key: caseInsensitiveMatch.key, name: caseInsensitiveMatch.name };
     }
 
-    console.log(`No exact match found for project name: '${projectName}'`);
+    logger.log(`No exact match found for project name: '${projectName}'`);
     return { key: null, name: null };
   } catch (error) {
-    console.error(`Error finding project:`, error);
+    logger.error(`Error finding project: ${error}`);
     return { key: null, name: null };
   }
 }
@@ -798,8 +792,8 @@ export async function getJiraStatusCategories(projectKey: string): Promise<{
       }
     }
   } catch (error) {
-    console.error(`Error getting project statuses:`, error);
-    console.log("Falling back to getting all statuses (not project-specific)");
+    logger.error(`Error getting project statuses: ${error}`);
+    logger.log("Falling back to getting all statuses (not project-specific)");
   }
 
   return statusCategories;
@@ -929,9 +923,8 @@ export async function getReleasePlan(projectName: string): Promise<
 
     return releaseData;
   } catch (error) {
-    console.error(
-      `Error getting release plan for project ${projectName}:`,
-      error
+    logger.error(
+      `Error getting release plan for project ${projectName}: ${error}`
     );
     return [];
   }
@@ -1020,7 +1013,7 @@ export async function getBoardDetails(boardId: string): Promise<{
 
     return boardData;
   } catch (error) {
-    console.error(`Error fetching board details for board ${boardId}:`, error);
+    logger.error(`Error fetching board details for board ${boardId}: ${error}`);
     throw error;
   }
 }
@@ -1092,8 +1085,8 @@ export async function getAllBoards(options?: {
 
     let filteredBoards = boardsData.values;
 
-    console.log(`[DEBUG] Total boards found: ${boardsData.values.length}`);
-    console.log(
+    logger.log(`[DEBUG] Total boards found: ${boardsData.values.length}`);
+    logger.log(
       `[DEBUG] Available boards:`,
       boardsData.values.map((b) => ({
         id: b.id,
@@ -1110,7 +1103,7 @@ export async function getAllBoards(options?: {
         (board) =>
           board.location && board.location.projectKey === options.projectKey
       );
-      console.log(
+      logger.log(
         `[DEBUG] Filtered by projectKey '${options.projectKey}': ${beforeFilter} -> ${filteredBoards.length} boards`
       );
     }
@@ -1121,14 +1114,14 @@ export async function getAllBoards(options?: {
       filteredBoards = filteredBoards.filter(
         (board) => board.type === options.boardType
       );
-      console.log(
+      logger.log(
         `[DEBUG] Filtered by boardType '${options.boardType}': ${beforeFilter} -> ${filteredBoards.length} boards`
       );
     }
 
     // Include detailed information if requested
     if (options?.includeDetails) {
-      console.log(
+      logger.log(
         `[DEBUG] Fetching detailed information for ${filteredBoards.length} boards`
       );
       const detailedBoards = await Promise.all(
@@ -1140,9 +1133,8 @@ export async function getAllBoards(options?: {
               ...details,
             };
           } catch (error) {
-            console.error(
-              `[DEBUG] Failed to get details for board ${board.id}:`,
-              error
+            logger.error(
+              `[DEBUG] Failed to get details for board ${board.id}: ${error}`
             );
             return board;
           }
@@ -1153,7 +1145,7 @@ export async function getAllBoards(options?: {
 
     return filteredBoards;
   } catch (error) {
-    console.error("Error fetching all boards:", error);
+    logger.error("Error fetching all boards: ${error}");
     throw error;
   }
 }
@@ -1213,9 +1205,8 @@ export async function getBoardConfiguration(boardId: string): Promise<{
 
     return configData;
   } catch (error) {
-    console.error(
-      `Error fetching board configuration for board ${boardId}:`,
-      error
+    logger.error(
+      `Error fetching board configuration for board ${boardId}: ${error}`
     );
     throw error;
   }
@@ -1304,7 +1295,7 @@ export async function getBoardIssues(
 
     return issuesData;
   } catch (error) {
-    console.error(`Error fetching board issues for board ${boardId}:`, error);
+    logger.error(`Error fetching board issues for board ${boardId}: ${error}`);
     throw error;
   }
 }
@@ -1353,7 +1344,7 @@ export async function getBoardBacklog(boardId: string): Promise<{
 
     return backlogData;
   } catch (error) {
-    console.error(`Error fetching board backlog for board ${boardId}:`, error);
+    logger.error(`Error fetching board backlog for board ${boardId}: ${error}`);
     throw error;
   }
 }
@@ -1399,9 +1390,8 @@ export async function getBoardRapidViews(boardId: string): Promise<
 
     return rapidViewsData.views || [];
   } catch (error) {
-    console.error(
-      `Error fetching board rapid views for board ${boardId}:`,
-      error
+    logger.error(
+      `Error fetching board rapid views for board ${boardId}: ${error}`
     );
     throw error;
   }
@@ -1481,9 +1471,8 @@ export async function getBoardStatistics(boardId: string): Promise<{
       },
     };
   } catch (error) {
-    console.error(
-      `Error fetching board statistics for board ${boardId}:`,
-      error
+    logger.error(
+      `Error fetching board statistics for board ${boardId}: ${error}`
     );
     throw error;
   }

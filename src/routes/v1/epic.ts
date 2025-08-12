@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getEpicSummary, getEpicDetails } from '../../services/epicService';
+import logger from '../../utils/logger';
 
 const router = Router();
 
@@ -94,7 +95,7 @@ router.get('/summary', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    console.error('Error in epic summary endpoint:', err);
+    logger.error(`Error in epic summary endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });
@@ -191,7 +192,7 @@ router.get('/:epicKey', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    console.error('Error in epic details endpoint:', err);
+    logger.error(`Error in epic details endpoint: ${(err as Error).message}`);
     res.status(500).json({ error: (err as Error).message });
   }
 });

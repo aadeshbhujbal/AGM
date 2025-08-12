@@ -9,6 +9,7 @@ import {
   PiPlanningSummaryResult
 } from '../types/piPlanning';
 import { JiraIssueStatusCategory, JiraSprintState, JiraIssue, JiraSprint, RagStatus, JiraVersion } from '../types/jira';
+import logger from '../utils/logger';
 
 function processStoryPointsValue(storyPointsInput: number | string | undefined | null): number {
   if (typeof storyPointsInput === 'number') {
@@ -104,7 +105,7 @@ export async function piPlanningSummaryService(piPlanningOptions: PiPlanningSumm
       ${sprintFilterClause}
     )`;
   
-  console.log('JQL Query:', issueSearchJqlQuery); // For debugging
+  logger.debug('JQL Query:', issueSearchJqlQuery); // For debugging
   const issuesMatchingCriteria = await getIssuesFromJira(issueSearchJqlQuery);
 
   // 5. Calculate story points and group by status
@@ -306,7 +307,7 @@ export async function piPlanningSummaryService(piPlanningOptions: PiPlanningSumm
         };
       }
     } catch (error) {
-      console.error('Error fetching epic details:', error);
+      logger.error('Error fetching epic details:', error);
     }
   }
   

@@ -1,15 +1,19 @@
 import { Request, Response } from 'express';
 import { fetchWithProxy } from '../../utils/fetchWithProxy';
+import config from '../../config';
+import logger from '../../utils/logger';
 
 export const updateConfluencePage = async (req: Request, res: Response): Promise<void> => {
   const { pageId, title, body, auth } = req.body;
   if (!pageId || !title || !body || !auth) {
+    logger.warn('Missing required fields in updateConfluencePage request');
     res.status(400).json({ error: 'Missing required fields: pageId, title, body, auth' });
     return;
   }
+  
   try {
     const response = await fetchWithProxy(
-      `https://natwest.atlassian.net/wiki/rest/api/content/${pageId}`,
+      `${config.confluenceUrl}/wiki/rest/api/content/${pageId}`,
       {
         method: 'PUT',
         headers: {
@@ -26,30 +30,33 @@ export const updateConfluencePage = async (req: Request, res: Response): Promise
       }
     );
     const data = await response.json();
+    logger.info(`Confluence page ${pageId} updated successfully`);
     res.json({ status: 'success', data });
   } catch (error: any) {
+    logger.error(`Failed to update Confluence page: ${error.message}`);
     res.status(500).json({ error: error.message });
   }
 };
 
 export const testConfluenceConnection = async (req: Request, res: Response): Promise<void> => {
-  const confluenceUrl = process.env.CONFLUENCE_URL;
-  const username = process.env.CONFLUENCE_USER;
-  const token = process.env.CONFLUENCE_TOKEN;
-  if (!confluenceUrl || !username || !token) {
+  if (!config.confluenceUrl || !config.confluenceUser || !config.confluenceToken) {
+    logger.error('Missing Confluence environment variables');
     res.status(500).json({ status: 'error', message: 'Missing Confluence environment variables' });
     return;
   }
+  
   try {
-    await fetchWithProxy(`${confluenceUrl}/wiki/rest/api/user/current`, {
+    await fetchWithProxy(`${config.confluenceUrl}/wiki/rest/api/user/current`, {
       method: 'GET',
       headers: {
-        'Authorization': `Basic ${Buffer.from(`${username}:${token}`).toString('base64')}`,
+        'Authorization': `Basic ${Buffer.from(`${config.confluenceUser}:${config.confluenceToken}`).toString('base64')}`,
         'Content-Type': 'application/json',
       },
     });
+    logger.info('Confluence connection test successful');
     res.json({ status: 'success', message: 'Connected to Confluence successfully' });
   } catch (error: any) {
+    logger.error(`Confluence connection test failed: ${error.message}`);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

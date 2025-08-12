@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { piPlanningSummaryService } from '../../services/piPlanningService';
+import logger from '../../utils/logger';
 
 export const piPlanningSummary = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -12,8 +13,10 @@ export const piPlanningSummary = async (req: Request, res: Response): Promise<vo
       piEndDate: piEndDate as string,
       // Add more params as needed
     });
+    logger.info(`PI Planning summary generated for project: ${project}, board: ${boardId}`);
     res.json(summary);
   } catch (error) {
+    logger.error(`Failed to generate PI Planning summary: ${(error as Error).message}`);
     res.status(500).json({ error: 'Failed to generate PI Planning summary', details: (error as Error).message });
   }
 }; 

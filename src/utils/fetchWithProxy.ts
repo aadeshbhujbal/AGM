@@ -1,5 +1,7 @@
-import { request, ProxyAgent } from 'undici';
-import { createNetworkError, createParseError, createValidationError, NetworkError, ParseError } from '../types/errors';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
+import config from '../config';
+import logger from './logger';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
 
@@ -21,65 +23,69 @@ interface FetchResponse {
 }
 
 export const fetchWithProxy = async (url: string, options: FetchOptions = {}): Promise<FetchResponse> => {
-  if (!url) throw createValidationError('Invalid URL provided', 'url', url);
+  const { method = 'GET', headers = {}, body, auth, timeout = 30000 } = options;
 
-  const proxyUrl = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-  const headers: Record<string, string> = {
+  // Prepare headers
+  const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...headers,
   };
 
-  if (options.auth) {
-    const { username, password } = options.auth;
-    headers['Authorization'] = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+  // Add authentication if provided
+  if (auth) {
+    const authString = Buffer.from(`${auth.username}:${auth.password}`).toString('base64');
+    requestHeaders['Authorization'] = `Basic ${authString}`;
   }
 
-  const requestOptions: {
-    method: HttpMethod;
-    headers: Record<string, string>;
-    body?: string;
-    dispatcher?: ProxyAgent;
-    signal?: AbortSignal;
-  } = {
-    method: options.method || 'GET',
-    headers,
+  // Configure proxy agents
+  let agent: HttpsProxyAgent | HttpProxyAgent | undefined;
+  
+  if (url.startsWith('https://') && config.httpsProxy) {
+    agent = new HttpsProxyAgent(config.httpsProxy);
+    logger.debug(`Using HTTPS proxy: ${config.httpsProxy}`);
+  } else if (url.startsWith('http://') && config.httpProxy) {
+    agent = new HttpProxyAgent(config.httpProxy);
+    logger.debug(`Using HTTP proxy: ${config.httpProxy}`);
+  }
+
+  // Prepare fetch options
+  const fetchOptions: any = {
+    method,
+    headers: requestHeaders,
+    timeout,
   };
 
-  if (options.body) requestOptions.body = options.body;
-  if (proxyUrl) requestOptions.dispatcher = new ProxyAgent(proxyUrl);
-  if (options.timeout) {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), options.timeout);
-    requestOptions.signal = controller.signal;
+  if (agent) {
+    fetchOptions.agent = agent;
+  }
+
+  if (body) {
+    fetchOptions.body = body;
+  }
+
+  // Disable TLS verification if configured
+  if (config.nodeTlsRejectUnauthorized === false) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    logger.warn('TLS certificate verification disabled');
   }
 
   try {
-    const response = await request(url, requestOptions);
-    const responseText = await response.body.text();
-
+    logger.debug(`Making ${method} request to: ${url}`);
+    
+    const response = await fetch(url, fetchOptions);
+    
+    logger.debug(`Response status: ${response.status} ${response.statusText}`);
+    
     return {
-      ok: response.statusCode >= 200 && response.statusCode < 300,
-      status: response.statusCode,
-      statusText: response.statusCode === 200 ? 'OK' : 'Unknown',
-      headers: response.headers as Record<string, string>,
-      json: async () => {
-        try {
-          return JSON.parse(responseText);
-        } catch (parseError) {
-          throw createParseError(
-            `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`,
-            'application/json',
-            responseText
-          );
-        }
-      },
-      text: async () => responseText,
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries()),
+      json: () => response.json(),
+      text: () => response.text(),
     };
   } catch (error) {
-    if (error instanceof Error) {
-      throw createNetworkError(`Request to ${url} failed: ${error.message}`, url);
-    } else {
-      throw createNetworkError(`Request to ${url} failed: ${String(error)}`, url);
-    }
+    logger.error(`Request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
   }
 }; 

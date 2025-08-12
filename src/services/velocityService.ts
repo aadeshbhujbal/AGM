@@ -8,6 +8,7 @@ import {
   getIssuesFromJira,
   getSprintIssuesWithAssignee,
 } from "./jiraService";
+import logger from "../utils/logger";
 
 export async function getVelocitySummary(
   options: VelocitySummaryOptions
@@ -15,12 +16,12 @@ export async function getVelocitySummary(
   const { boardId, numSprints, year, sprintPrefix } = options;
 
   try {
-    console.log(`[DEBUG] Getting velocity summary for: ${boardId}`);
+    logger.debug(`Getting velocity summary for: ${boardId}`);
 
     // 1. Get closed sprints for the board/project
     let sprints = await getClosedSprintsFromJira(boardId);
-    console.log(
-      `[DEBUG] Found ${sprints.length} closed sprints for ${boardId}`
+    logger.debug(
+      `Found ${sprints.length} closed sprints for ${boardId}`
     );
     if (sprintPrefix) {
       sprints = sprints.filter(
@@ -116,7 +117,7 @@ export async function getVelocitySummary(
       latestSprintEfficiency: summaryEfficiency,
     };
   } catch (error) {
-    console.error(`Error in getVelocitySummary for board ${boardId}:`, error);
+    logger.error(`Error in getVelocitySummary for board ${boardId}:`, error);
     throw error;
   }
 }
@@ -156,7 +157,7 @@ export async function getSprintTeamMembersDetails(sprintId: number): Promise<{
       members,
     };
   } catch (error) {
-    console.error(
+    logger.error(
       `Error getting team member details for sprint ${sprintId}:`,
       error
     );
@@ -181,7 +182,7 @@ export async function getSprintTeamMembers(sprintId: number): Promise<number> {
     );
     return assigneeAccountIds.size;
   } catch (error) {
-    console.error(`Error getting team members for sprint ${sprintId}:`, error);
+    logger.error(`Error getting team members for sprint ${sprintId}:`, error);
     return 0;
   }
 }
@@ -206,7 +207,7 @@ export async function getAddedStoryPoints(
 
     return totalAddedStoryPoints;
   } catch (error) {
-    console.error(
+    logger.error(
       `Error getting added story points for sprint ${sprintId}:`,
       error
     );
@@ -324,7 +325,7 @@ export async function getVelocityChartData(
 
     return velocityData;
   } catch (error) {
-    console.error(
+    logger.error(
       `Error getting velocity chart data for board ${boardId}:`,
       error
     );

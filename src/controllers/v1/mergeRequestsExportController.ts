@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 // @ts-ignore
 import { Parser } from 'json2csv';
+import logger from '../../utils/logger';
 
 /**
  * @swagger
@@ -36,6 +37,7 @@ import { Parser } from 'json2csv';
 export const exportMergeRequestsCsv = async (req: Request, res: Response): Promise<void> => {
   const data = req.body.data;
   if (!Array.isArray(data) || data.length === 0) {
+    logger.warn('Invalid or empty data array provided for CSV export');
     res.status(400).json({ error: 'Missing or invalid data array in request body.' });
     return;
   }
@@ -45,9 +47,10 @@ export const exportMergeRequestsCsv = async (req: Request, res: Response): Promi
     const csv = parser.parse(data);
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="merge_requests.csv"');
+    logger.info(`Successfully exported ${data.length} merge requests to CSV`);
     res.send(csv);
   } catch (err: any) {
-    console.error('Error exporting merge requests to CSV:', err);
+    logger.error(`Error exporting merge requests to CSV: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 }; 

@@ -3,6 +3,7 @@ import { JiraVersion, JiraIssue } from '../types/jira';
 import { getReleasesFromJira, getIssuesFromJira } from './jiraService';
 import { calculateStoryPointBreakdown } from '../utils/storyPointUtils';
 import config from '../config';
+import logger from '../utils/logger';
 
 export async function getMilestones(options: MilestoneSummaryOptions): Promise<MilestoneData[]> {
   const { projectKey, status, track, startDate, endDate } = options;
@@ -64,7 +65,7 @@ export async function getMilestones(options: MilestoneSummaryOptions): Promise<M
 
     return chronologicallySortedMilestones;
   } catch (error) {
-    console.error('Error fetching milestones:', error);
+    logger.error('Error fetching milestones:', error);
     throw error;
   }
 }
@@ -101,7 +102,7 @@ export async function getPIProgression(projectKey: string, boardId: string, piSt
       }
     };
   } catch (error) {
-    console.error('Error calculating PI progression:', error);
+    logger.error('Error calculating PI progression:', error);
     throw error;
   }
 }

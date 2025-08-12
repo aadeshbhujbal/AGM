@@ -3,6 +3,7 @@ import { JiraIssue } from "../types/jira";
 import { getIssuesFromJira } from "./jiraService";
 import { fetchWithProxy } from "../utils/fetchWithProxy";
 import config from "../config";
+import logger from "../utils/logger";
 
 export async function getEpicDetails(
   epicKey: string
@@ -13,7 +14,7 @@ export async function getEpicDetails(
     const epicIssues = await getIssuesFromJira(jql);
 
     if (epicIssues.length === 0) {
-      console.error(`Epic ${epicKey} not found`);
+      logger.error(`Epic ${epicKey} not found`);
       return null;
     }
 
@@ -47,7 +48,7 @@ export async function getEpicDetails(
       updated: epicFields.updated,
     };
   } catch (error) {
-    console.error(`Error fetching epic ${epicKey}:`, error);
+    logger.error(`Error fetching epic ${epicKey}:`, error);
     return null;
   }
 }
@@ -90,7 +91,7 @@ export async function getEpicSummary(
 
     return epicRows;
   } catch (error) {
-    console.error("Error fetching epic summary:", error);
+    logger.error("Error fetching epic summary:", error);
     throw error;
   }
 }
@@ -102,9 +103,9 @@ export async function getEpicSummary(
 export async function getEpicSummaryByKey(epicKey: string): Promise<string> {
   try {
     const credentials = {
-      url: process.env.JIRA_URL!,
-      user: process.env.JIRA_USER!,
-      token: process.env.JIRA_TOKEN!,
+      url: config.jiraUrl,
+      user: config.jiraUser,
+      token: config.jiraToken,
     };
 
     const response = await fetchWithProxy(
@@ -122,7 +123,7 @@ export async function getEpicSummaryByKey(epicKey: string): Promise<string> {
     const formattedSummary = data.fields.summary.replace(/\n/g, "<br/>");
     return formattedSummary;
   } catch (error) {
-    console.error(`Error getting epic summary for ${epicKey}:`, error);
+    logger.error(`Error getting epic summary for ${epicKey}:`, error);
     return "";
   }
 }
@@ -207,7 +208,7 @@ async function calculateEpicStoryPoints(
       total: originalStoryPoints + addedStoryPoints,
     };
   } catch (error) {
-    console.error(`Error calculating story points for epic ${epicKey}:`, error);
+    logger.error(`Error calculating story points for epic ${epicKey}:`, error);
     return {
       original: epicStoryPoints,
       added: 0,
